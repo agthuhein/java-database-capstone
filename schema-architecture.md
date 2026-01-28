@@ -18,4 +18,3 @@ All requests first pass through **controllers**, which delegate the business log
 5. The database executes the query or operation, returning the requested data or confirmation of changes.  
 6. The service layer processes the data and sends it back to the **controller**.  
 7. Finally, the controller returns a **response**: either a rendered Thymeleaf page for dashboards or a JSON payload for REST APIs.
-
