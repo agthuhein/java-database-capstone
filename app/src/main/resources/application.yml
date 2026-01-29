@@ -1,6 +1,8 @@
 spring:
   application:
     name: back-end
+  main:
+    allow-bean-definition-overriding: true
 
   datasource:
     url: jdbc:mysql://localhost:3306/cms
@@ -20,9 +22,6 @@ spring:
       hibernate:
         format_sql: true
     open-in-view: false
-
-
-
   web:
     resources:
       static-locations: classpath:/static/
