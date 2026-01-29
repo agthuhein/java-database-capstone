@@ -5,13 +5,14 @@ spring:
     allow-bean-definition-overriding: true
 
   datasource:
-    url: jdbc:mysql://localhost:3306/cms
+    url: jdbc:mysql://mysql:3306/smartclinic?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
-    password: root12345
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   data:
     mongodb:
-      uri: mongodb://localhost:27017
+      uri: mongodb://mongo:27017
       database: prescriptions
 
   jpa:
@@ -22,6 +23,7 @@ spring:
       hibernate:
         format_sql: true
     open-in-view: false
+
   web:
     resources:
       static-locations: classpath:/static/
