@@ -1,104 +1,93 @@
-<!-- index.html -->
-<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-Step-by-Step Explanation of `index.html`.
-This file allows users to select a role (Admin, Patient, Doctor) 
-and triggers modal-based login functionality.
+    <title>Smart Clinic Management System</title>
 
-1. Label the File
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="./assets/images/favicon.png" />
 
-   * Add a comment at the very top to identify the file as `index.html`. This helps developers stay organized.
+    <!-- CSS -->
+    <link rel="stylesheet" href="./assets/css/index.css" />
+    <link rel="stylesheet" href="./assets/css/style.css" />
 
-2. Declare Document Type
+    <!-- Utilities / Render helpers -->
+    <script src="./js/util.js" defer></script>
+    <script src="./js/render.js" defer></script>
 
-   * Use the declaration for HTML5 so browsers know how to render the page correctly.
+    <!-- Components -->
+    <script src="./js/components/header.js" defer></script>
+    <script src="./js/components/footer.js" defer></script>
+</head>
 
-3. Start the HTML Document
+<body>
+<main>
+    <div class="container">
+        <div class="wrapper">
+            <!-- Header Placeholder -->
+            <div id="header"></div>
 
-   * Begin the HTML structure and set the document language to English to improve accessibility and SEO `lang="en"`.
+            <!-- Main Content -->
+            <main class="main-content">
+                <h2 id="roleTitle">Select Your Role</h2>
 
-4. Head Section (Metadata and Resources)
+                <div class="role-buttons" id="roleButtons">
+                    <button id="adminBtn" class="btn role-btn" onclick="selectRole('admin')">
+                        Admin
+                    </button>
 
-   * Open the `<head>` section which contains settings and links that don’t show up visually.
+                    <button id="doctorBtn" class="btn role-btn" onclick="selectRole('doctor')">
+                        Doctor
+                    </button>
 
-5. Set Character Encoding
+                    <button id="patientBtn" class="btn role-btn" onclick="selectRole('patient')">
+                        Patient
+                    </button>
+                </div>
 
-   * Specify UTF-8 encoding to support most global characters and symbols.
+                <!-- Optional helper text -->
+                <p id="roleHint" class="hint">
+                    Choose a role to continue. Your selection will be saved in your browser.
+                </p>
+            </main>
 
-6. Set the Page Title
+            <!-- Footer Placeholder -->
+            <div id="footer"></div>
+        </div>
+    </div>
+</main>
 
-   * Give the page a name (e.g., "Select Role") that appears on the browser tab.
+<!-- Modal (hidden by default) -->
+<div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button id="closeModal" class="modal-close" type="button" aria-label="Close modal">
+            &times;
+        </button>
 
-7. Add a Favicon
+        <div id="modal-body">
+            <!-- Dynamic content injected by JS -->
+            <h3 id="modalTitle">Login</h3>
+            <p>Please log in to continue.</p>
+        </div>
+    </div>
+</div>
 
-   * Link to an icon (like a logo) that will appear in the browser tab from the address `href="../assets/images/logo/Logo.png"`
+<!-- Module script for role selection + modal behavior -->
+<script type="module" src="./js/services/index.js" defer></script>
 
-8. Link Stylesheets
-
-   * Add a page-specific stylesheet for layout and design.
-   * Also include a global stylesheet for shared site-wide styles.
-
-   HINT:
-      `<link rel="stylesheet" href="../assets/css/index.css">`
-      `<link rel="stylesheet" href="../assets/css/style.css">`
-
-9. Add JavaScript Files with `defer`
-
-   * Link utility and rendering JavaScript files (e.g., `util.js`, `render.js`).
-   * Include scripts for rendering components like header and footer.
-   * Use the `defer` attribute so they load after the HTML is parsed.
-
-   HINT:
-      `<script src="../js/util.js" defer></script>`
-      `<script src="../js/render.js" defer></script>`
-      `<script src="../js/components/header.js" defer></script>`
-      `<script src="../js/components/footer.js" defer></script>`
-      
-10. Close the Head and Open the Body
-
-    * Wrap up metadata and begin the visible page content.
-
-11. Create a Container
-
-    * Add a main container to hold all page elements and apply layout constraints.
-
-12. Use a Wrapper for Structure
-
-    * Inside the container, add a wrapper to group header, main, and footer sections logically.
-
-13. Insert a Header Placeholder
-
-    * Add a `div` that will be dynamically filled by JavaScript with the site’s header.
-
-14. Define the Main Section
-
-    * Use a semantic `<main>` tag to hold the central content of the page.
-
-15. Add a Heading for Role Selection
-
-    * Display a heading like “Select Your Role” to instruct users.
-
-16. Add Buttons for Roles
-
-    * Create buttons for each role: Admin, Patient, and Doctor.
-    * Assign unique identifiers or `onclick` handlers to them as needed.
-
-17. Insert a Footer Placeholder
-
-    * Add a `div` that will be dynamically filled by JavaScript with the site’s footer.
-
-18. Create a Modal Structure
-
-    * Add a modal overlay for popups (like login forms).
-    * Include a close button and an inner container for dynamic content.
-
-19. Load Page-Specific Logic Module
-
-    * Use a `<script type="module">` tag to load the role selection logic (e.g., `index.js`).
-    * Ensure it’s deferred so it doesn’t block HTML rendering.
-
-20. Close the Body and HTML Tags
-
-    * Properly close all opened tags to complete the document structure.
-
- -->
+<!-- Fallback: define selectRole if your module doesn’t attach it globally
+     (You can remove this if your index.js sets window.selectRole) -->
+<script>
+    // If index.js defines window.selectRole, this won't override it.
+    if (typeof window.selectRole !== "function") {
+        window.selectRole = function(role) {
+            localStorage.setItem("role", role);
+            // Trigger modal if your module listens to this event
+            window.dispatchEvent(new CustomEvent("role:selected", { detail: { role } }));
+        };
+    }
+</script>
+</body>
+</html>

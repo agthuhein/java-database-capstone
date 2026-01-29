@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: back-end
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/cms
+    username: root
+    password: root12345
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/prescriptions
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+
+
+  web:
+    resources:
+      static-locations: classpath:/static/
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    cache: false
+    encoding: UTF-8
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  health:
+    db:
+      enabled: true
+
+api:
+  path: /
+
+jwt:
+  secret: $!@#$^%$$$%####$DDCPN0234FCFDPD8670M

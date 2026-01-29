@@ -1,80 +1,205 @@
-/* This is the style sheet for the patientDashboard.html */
-  .card-actions {
-    background-color: #244557;
-    padding: 10px;
-    text-align: center;
-  }
+/* =========================
+   Base reset (safe even if other CSS exists)
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-  .card-actions:hover{
-    background-color: #1c3745;
-  }
-  .ripple-overlay {
-    position: fixed;
-    width: 20px;
-    height: 20px;
-    background-color: #1c3745;
-    border-radius: 50%;
-    z-index: 9999;
-    transform: translate(-50%, -50%) scale(0);
-    transition: transform 1s ease-out, opacity 1s ease;
-  }
-  
-  .ripple-overlay.active {
-    transform: translate(-50%, -50%) scale(150);
-    opacity: 1;
-  }
-  
-  .modalApp {
-    position: fixed;
-  bottom: -100%;
+/* =========================
+   Doctor Card Actions
+   (Book Now area)
+========================= */
+.card-actions {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+
+  background: #1f2d3d; /* dark background */
+  color: #fff;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  border-radius: 10px;
+  cursor: pointer;
+
+  transition: background-color 0.2s ease;
+}
+
+.card-actions:hover {
+  background: #172130; /* slightly darker on hover */
+}
+
+/* Optional: button inside card-actions */
+.card-actions button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* =========================
+   Ripple Overlay (Visual Feedback)
+   Create a circle that expands.
+   Usage (JS idea): create a div.ripple-overlay at click position
+========================= */
+.ripple-overlay {
+  position: fixed;
   left: 50%;
-  transform: translateX(-50%);
-  width: 50%;
-  background: #fff;
-  padding: 20px;
-  z-index: 10000;
-  transition: bottom 1.5s ease-in;
-  box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
-  border-radius: 10px 10px 0 0;
-  text-align: center;
-  }
-  
-  .modalApp.active {
-    bottom: 0;
-  }
-  
-  .modalApp h2 {
-    margin-top: 20px;
-  }
-  
-  .modalApp input {
-    display: block;
-    margin: 10px auto;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.22);
+
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 600ms ease, opacity 600ms ease;
+
+  z-index: 2000;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* When active, it expands outward */
+.ripple-overlay.active {
+  transform: translate(-50%, -50%) scale(18);
+  opacity: 1;
+}
+
+/* Fade away after expanding */
+.ripple-overlay.fade-out {
+  opacity: 0;
+}
+
+/* =========================
+   Bottom Pop-Up Modal for Booking (.modalApp)
+   Slides in from bottom when .active is toggled
+========================= */
+.modalApp {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+
+  width: min(520px, 95%);
+  background: #ffffff;
+
+  padding: 18px 16px 22px;
+  border-radius: 16px 16px 0 0;
+
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.18);
+
+  transform: translate(-50%, 110%);
+  transition: transform 300ms ease;
+
+  z-index: 1500;
+}
+
+/* Slide-in state */
+.modalApp.active {
+  transform: translate(-50%, 0);
+}
+
+/* Optional close row / title inside modalApp */
+.modalApp .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.modalApp .modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2d3d;
+}
+
+.modalApp .modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #888;
+}
+
+.modalApp .modal-close:hover {
+  color: #333;
+}
+
+/* =========================
+   Form Fields Inside Booking Modal
+========================= */
+.modalApp input,
+.modalApp select,
+.modalApp textarea {
+  width: 90%;
+  display: block;
+  margin: 10px auto;
+
+  padding: 12px 12px;
+  border-radius: 10px;
+  border: 1px solid #d0d7de;
+
+  font-size: 14px;
+  outline: none;
+}
+
+.modalApp input:focus,
+.modalApp select:focus,
+.modalApp textarea:focus {
+  border-color: #1f2d3d;
+  box-shadow: 0 0 0 3px rgba(31, 45, 61, 0.15);
+}
+
+/* =========================
+   Booking Confirmation Button
+========================= */
+.booking-confirm-btn {
+  width: 90%;
+  display: block;
+  margin: 14px auto 0;
+
+  background: #1f2d3d; /* dark theme */
+  color: #ffffff;
+
+  border: none;
+  border-radius: 10px;
+
+  padding: 12px 14px;
+  font-weight: 700;
+  cursor: pointer;
+
+  transition: filter 0.2s ease, transform 0.15s ease;
+}
+
+.booking-confirm-btn:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+/* =========================
+   Responsive tweaks
+========================= */
+@media (max-width: 480px) {
+  .card-actions {
     padding: 10px;
-    width: 90%;
-    margin-bottom: 40px;
+    border-radius: 9px;
   }
 
-  .modalApp select {
-    display: block;
-    margin: 10px auto;
-    padding: 10px;
-    width: 90%;
-    margin-bottom: 40px;
+  .modalApp {
+    padding: 16px 12px 20px;
+    border-radius: 14px 14px 0 0;
   }
-  
-  .confirm-booking {
-    padding: 10px 20px;
-    background: #1c3745;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    
-  
-    
+
+  .modalApp input,
+  .modalApp select,
+  .modalApp textarea,
+  .booking-confirm-btn {
+    width: 92%;
   }
-  .confirm-booking:hover {
-    filter: brightness(1.2);
-    background-color: #1c3745;
-  }
-  
+}
