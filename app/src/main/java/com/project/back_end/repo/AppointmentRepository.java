@@ -13,9 +13,11 @@ import java.util.List;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+
     @Query("""
-        SELECT a FROM Appointment a
+        SELECT DISTINCT a FROM Appointment a
         LEFT JOIN FETCH a.doctor d
+        LEFT JOIN FETCH d.availableTimes
         WHERE d.id = :doctorId
         AND a.appointmentTime BETWEEN :start AND :end
     """)
@@ -26,7 +28,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     );
 
     @Query("""
-        SELECT a FROM Appointment a
+        SELECT DISTINCT a FROM Appointment a
         LEFT JOIN FETCH a.doctor d
         LEFT JOIN FETCH a.patient p
         WHERE d.id = :doctorId
@@ -76,5 +78,4 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Transactional
     @Query("UPDATE Appointment a SET a.status = :status WHERE a.id = :id")
     void updateStatus(@Param("status") int status, @Param("id") long id);
-
 }
