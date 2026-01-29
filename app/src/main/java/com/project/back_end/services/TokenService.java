@@ -1,9 +1,11 @@
 package com.project.back_end.services;
+
 import com.project.back_end.repo.AdminRepository;
 import com.project.back_end.repo.DoctorRepository;
 import com.project.back_end.repo.PatientRepository;
-import io.jsonwebtoken.Claims;
+
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.Keys;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,7 @@ import java.util.Date;
 
 @Component
 public class TokenService {
+
     private final AdminRepository adminRepository;
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
@@ -30,61 +33,57 @@ public class TokenService {
         this.patientRepository = patientRepository;
     }
 
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-    }
-
-    public String generateToken(String subject) {
+    // Generate JWT for username/email (Admin uses username, Doctor/Patient uses email)
+    public String generateToken(String identifier) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + 7L * 24 * 60 * 60 * 1000); // 7 days
+        Date expiry = new Date(now.getTime() + (7L * 24 * 60 * 60 * 1000)); // 7 days
 
         return Jwts.builder()
-                .subject(subject)
+                .subject(identifier)
                 .issuedAt(now)
                 .expiration(expiry)
-                .signWith(getSigningKey())
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
 
-    public String extractEmail(String token) {
-        Claims claims = Jwts.parser()
-                .verifyWith(getSigningKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-
-        return claims.getSubject();
+    // Extract subject (identifier) from token
+    public String extractIdentifier(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
     }
 
-    public boolean validateToken(String token, String role) {
+    // Optional compatibility helper if other services call extractEmail()
+    public String extractEmail(String token) {
+        return extractIdentifier(token);
+    }
+
+    // Validate token for a role (admin/doctor/patient)
+    public boolean validateToken(String token, String user) {
         try {
-            if (token == null || token.isBlank() || role == null || role.isBlank()) {
-                return false;
-            }
+            String identifier = extractIdentifier(token);
+            if (identifier == null || user == null) return false;
 
-            String subject = extractEmail(token);
-            if (subject == null || subject.isBlank()) {
-                return false;
-            }
-
-            switch (role.toLowerCase()) {
-                case "admin":
-                    // Admin token subject should match username
-                    return adminRepository.existsByUsername(subject);
-
-                case "doctor":
-                    // Doctor token subject should match email
-                    return doctorRepository.existsByEmail(subject);
-
-                case "patient":
-                    // Patient token subject should match email
-                    return patientRepository.existsByEmail(subject);
-
-                default:
-                    return false;
-            }
+            return switch (user.toLowerCase()) {
+                case "admin" -> adminRepository.findByUsername(identifier) != null;
+                case "doctor" -> doctorRepository.findByEmail(identifier) != null;
+                case "patient" -> patientRepository.findByEmail(identifier) != null;
+                default -> false;
+            };
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private SecretKey getSigningKey() {
+        // HS256 needs a sufficiently long secret (>= 32 chars recommended)
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 }

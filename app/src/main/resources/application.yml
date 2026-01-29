@@ -9,7 +9,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     mongodb:
-      uri: mongodb://localhost:27017/prescriptions
+      uri: mongodb://localhost:27017
+      database: prescriptions
 
   jpa:
     hibernate:
@@ -42,7 +43,7 @@ management:
       enabled: true
 
 api:
-  path: /
+  path: /api/
 
 jwt:
   secret: $!@#$^%$$$%####$DDCPN0234FCFDPD8670M
