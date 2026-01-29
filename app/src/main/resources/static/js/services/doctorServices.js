@@ -1,53 +1,158 @@
-/*
-  Import the base API URL from the config file
-  Define a constant DOCTOR_API to hold the full endpoint for doctor-related actions
+// app/src/main/resources/static/js/services/doctorServices.js
 
+import { API_BASE_URL } from "../config/config.js";
 
-  Function: getDoctors
-  Purpose: Fetch the list of all doctors from the API
+const DOCTOR_API = API_BASE_URL + "/doctor";
 
-   Use fetch() to send a GET request to the DOCTOR_API endpoint
-   Convert the response to JSON
-   Return the 'doctors' array from the response
-   If there's an error (e.g., network issue), log it and return an empty array
+/**
+ * Get all doctors
+ * GET {DOCTOR_API}
+ * @returns {Promise<Array>} list of doctors ([]) if error
+ */
+export async function getDoctors() {
+    try {
+        const res = await fetch(DOCTOR_API, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
 
+        if (!res.ok) {
+            console.error("getDoctors failed:", res.status);
+            return [];
+        }
 
-  Function: deleteDoctor
-  Purpose: Delete a specific doctor using their ID and an authentication token
+        const data = await res.json();
+        // Expected: data is an array of doctors
+        return Array.isArray(data) ? data : [];
+    } catch (err) {
+        console.error("getDoctors error:", err);
+        return [];
+    }
+}
 
-   Use fetch() with the DELETE method
-    - The URL includes the doctor ID and token as path parameters
-   Convert the response to JSON
-   Return an object with:
-    - success: true if deletion was successful
-    - message: message from the server
-   If an error occurs, log it and return a default failure response
+/**
+ * Delete a doctor (Admin only)
+ * DELETE {DOCTOR_API}/{id}
+ * @param {number|string} id
+ * @param {string} token
+ * @returns {Promise<{success: boolean, message: string}>}
+ */
+export async function deleteDoctor(id, token) {
+    try {
+        if (!id) return { success: false, message: "Doctor id is required." };
+        if (!token) return { success: false, message: "Token is required." };
 
+        const res = await fetch(`${DOCTOR_API}/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
-  Function: saveDoctor
-  Purpose: Save (create) a new doctor using a POST request
+        let data = null;
+        try {
+            data = await res.json();
+        } catch (_) {
+            // if backend returns no JSON
+        }
 
-   Use fetch() with the POST method
-    - URL includes the token in the path
-    - Set headers to specify JSON content type
-    - Convert the doctor object to JSON in the request body
+        if (!res.ok) {
+            const msg = data?.message || "Failed to delete doctor.";
+            return { success: false, message: msg };
+        }
 
-   Parse the JSON response and return:
-    - success: whether the request succeeded
-    - message: from the server
+        return { success: true, message: data?.message || "Doctor deleted successfully." };
+    } catch (err) {
+        console.error("deleteDoctor error:", err);
+        return { success: false, message: "Something went wrong while deleting doctor." };
+    }
+}
 
-   Catch and log errors
-    - Return a failure response if an error occurs
+/**
+ * Save (Add) a new doctor (Admin only)
+ * POST {DOCTOR_API}
+ * @param {Object} doctor
+ * @param {string} token
+ * @returns {Promise<{success: boolean, message: string, data?: any}>}
+ */
+export async function saveDoctor(doctor, token) {
+    try {
+        if (!doctor) return { success: false, message: "Doctor data is required." };
+        if (!token) return { success: false, message: "Token is required." };
 
+        const res = await fetch(DOCTOR_API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(doctor),
+        });
 
-  Function: filterDoctors
-  Purpose: Fetch doctors based on filtering criteria (name, time, and specialty)
+        const data = await res.json().catch(() => ({}));
 
-   Use fetch() with the GET method
-    - Include the name, time, and specialty as URL path parameters
-   Check if the response is OK
-    - If yes, parse and return the doctor data
-    - If no, log the error and return an object with an empty 'doctors' array
+        if (!res.ok) {
+            return {
+                success: false,
+                message: data?.message || "Failed to add doctor.",
+            };
+        }
 
-   Catch any other errors, alert the user, and return a default empty result
-*/
+        return {
+            success: true,
+            message: data?.message || "Doctor added successfully.",
+            data,
+        };
+    } catch (err) {
+        console.error("saveDoctor error:", err);
+        return { success: false, message: "Something went wrong while saving doctor." };
+    }
+}
+
+/**
+ * Filter doctors by name/time/specialty.
+ * This builds a GET URL using query parameters (safe + flexible).
+ *
+ * Example:
+ * GET {DOCTOR_API}/filter?name=Ali&time=AM&specialty=Cardiology
+ *
+ * @param {string} name
+ * @param {string} time
+ * @param {string} specialty
+ * @returns {Promise<Array>} filtered doctors or []
+ */
+export async function filterDoctors(name, time, specialty) {
+    try {
+        const params = new URLSearchParams();
+
+        if (name && name.trim()) params.append("name", name.trim());
+        if (time && time.trim()) params.append("time", time.trim());
+        if (specialty && specialty.trim()) params.append("specialty", specialty.trim());
+
+        // If no filters, just return all doctors
+        if ([...params.keys()].length === 0) {
+            return await getDoctors();
+        }
+
+        const url = `${DOCTOR_API}/filter?${params.toString()}`;
+
+        const res = await fetch(url, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        if (!res.ok) {
+            console.error("filterDoctors failed:", res.status);
+            alert("Failed to filter doctors. Please try again.");
+            return [];
+        }
+
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+    } catch (err) {
+        console.error("filterDoctors error:", err);
+        alert("Unexpected error while filtering doctors.");
+        return [];
+    }
+}
